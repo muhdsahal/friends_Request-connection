@@ -20,11 +20,22 @@ class User(AbstractUser):
     
 
 class FriendRequest(models.Model):
+    STATUS_TYPES = (
+        ('request', 'request'),
+        ('pending', 'pending'),
+        ('accept', 'accept'),
+    )
+    
     from_user = models.ForeignKey(User, related_name='from_user', on_delete=models.CASCADE)
     to_user = models.ForeignKey(User, related_name='to_user', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    accepted = models.BooleanField(default=False)
-    
+    request_status = models.CharField(max_length=20,choices=STATUS_TYPES ,default='request')
+
     class Meta:
         unique_together = ('from_user', 'to_user')
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  
+            self.request_status = 'pending'
+        super().save(*args, **kwargs)
 
